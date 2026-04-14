@@ -28,6 +28,7 @@ static int gpio_export(int pin);
 static int gpio_set_direction(int pin, const char *dir);
 static int gpio_open_value_file(int pin);
 static void gpio_set_value_fd(int fd, int value);
+static void st7789_spi_transfer(uint8_t *tx, uint8_t *rx, int len);
 
 /*********************
  * GPIO HELPER FUNCTIONS
