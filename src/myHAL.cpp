@@ -205,6 +205,7 @@ void HAL::init()
     /*ST7789 SPI LCD init*/
     st7789_spi_init();
     st7789_init();
+    printf("ST7789 LCD initialized at 320x240\n");
 
     /*A buffer for LittlevGL to draw the screen's content*/
     buf = (lv_color_t *)malloc(320 * 240 * sizeof(lv_color_t));

@@ -38,7 +38,7 @@
 
 /* ST7789 SPI LCD specific macros */
 #if USE_ST7789
-    #include "lv_drivers/display/st7789_spi.h"
+    // #include "lv_drivers/display/st7789_spi.h"
     #define LV_DRV_DISP_CMD_DATA(val)  st7789_spi_set_dc(val)          /*Set DC pin for cmd/data*/
     #define LV_DRV_DISP_RST(val)       st7789_spi_set_rst(val)         /*Set RST pin*/
     #define LV_DRV_DISP_SPI_CS(val)    st7789_spi_set_cs(val)          /*Set CS pin*/
