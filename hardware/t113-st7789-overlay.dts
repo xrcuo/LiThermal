@@ -1,0 +1,112 @@
+/dts-v1/;
+/plugin/;
+
+/*
+ * Device Tree overlay for ST7789 LCD display on Allwinner T113
+ * 
+ * GPIO配置 (Allwinner T113):
+ * - SPI1: PD0(MOSI), PD1(CLK), PD3(CS)
+ * - GPIO: PB4(RST), PB5(DC)  
+ * - PWM: PB2(背光)
+ */
+
+/{
+    compatible = "allwinner,sun8i-t113";
+
+    /* 禁用JTAG以释放PD引脚 */
+    fragment@0 {
+        target-path = "/";
+        __overlay__ {
+            chosen {
+                bootargs = "earlyprintk";
+            };
+        };
+    };
+
+    /* SPI1总线配置 (PD0-PD3) */
+    fragment@1 {
+        target = <&spi1>;
+        __overlay__ {
+            status = "okay";
+            pinctrl-names = "default";
+            pinctrl-0 = <&spi1_pins_a>;
+            /* SPI从设备配置 (ST7789 LCD) */
+            st7789@0 {
+                compatible = "sitronix,st7789v";
+                reg = <0>;
+                spi-max-frequency = <80000000>;
+                spi-cpol;
+                spi-cpha;
+                
+                /* 引脚和属性配置 */
+                reset-gpios = <&pio 1 4 0>;      /* PB4 */
+                dc-gpios = <&pio 1 5 0>;         /* PB5 */
+                backlight = <&pwm0>;             /* PWM背光 */
+                
+                width = <320>;
+                height = <240>;
+                rgb = <16>;   /* RGB565 */
+                
+                /* 初始化命令序列 */
+                init-data = [
+                    /* 软复位后等待120ms */
+                    11 80
+                    /* 睡眠关闭 */
+                    10
+                    /* 颜色模式设置为16-bit RGB */
+                    3A 05
+                    /* 显示打开 */
+                    29
+                ];
+            };
+        };
+    };
+
+    /* GPIO配置 */
+    fragment@2 {
+        target = <&pio>;
+        __overlay__ {
+            st7789_pins: st7789_pins {
+                allwinner,pins = "PB4", "PB5", "PD0", "PD1", "PD3";
+                allwinner,function = "gpio_out", "gpio_out", "spi", "spi", "spi";
+                allwinner,drive = <1>;
+                allwinner,pull = <0>;
+            };
+            
+            spi1_pins_a: spi1_pins_a {
+                allwinner,pins = "PD0", "PD1", "PD2", "PD3";
+                allwinner,function = "spi";
+                allwinner,muxsel = <2>;
+                allwinner,drive = <1>;
+                allwinner,pull = <0>;
+            };
+        };
+    };
+
+    /* PWM背光控制 (PB2 - PWM0) */
+    fragment@3 {
+        target = <&pwm0>;
+        __overlay__ {
+            status = "okay";
+            pinctrl-names = "default";
+            pinctrl-0 = <&pwm0_pins>;
+            
+            sd-fixed-freq;
+            freq = <100000>;    /* 100kHz PWM频率 */
+        };
+    };
+
+    /* PWM0脚配置 */
+    fragment@4 {
+        target = <&pio>;
+        __overlay__ {
+            pwm0_pins: pwm0_pins {
+                allwinner,pins = "PB2";
+                allwinner,function = "pwm";
+                allwinner,muxsel = <2>;
+                allwinner,drive = <1>;
+                allwinner,pull = <0>;
+            };
+        };
+    };
+};

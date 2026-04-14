@@ -15,12 +15,17 @@
 
 #include "lv_conf.h"
 
+/* Forward declaration for ST7789 */
+#ifndef USE_ST7789
+#  define USE_ST7789            1
+#endif
+
 /*********************
  * DELAY INTERFACE
  *********************/
-#define LV_DRV_DELAY_INCLUDE  <stdint.h>            /*Dummy include by default*/
-#define LV_DRV_DELAY_US(us)  /*delay_us(us)*/       /*Delay the given number of microseconds*/
-#define LV_DRV_DELAY_MS(ms)  /*delay_ms(ms)*/       /*Delay the given number of milliseconds*/
+#define LV_DRV_DELAY_INCLUDE  <unistd.h>          /*Include for system delay*/
+#define LV_DRV_DELAY_US(us)  usleep(us)           /*Delay the given number of microseconds*/
+#define LV_DRV_DELAY_MS(ms)  usleep(ms*1000)      /*Delay the given number of milliseconds*/
 
 /*********************
  * DISPLAY INTERFACE
@@ -30,15 +35,26 @@
  *  Common
  *------------*/
 #define LV_DRV_DISP_INCLUDE         <stdint.h>           /*Dummy include by default*/
-#define LV_DRV_DISP_CMD_DATA(val)  /*pin_x_set(val)*/    /*Set the command/data pin to 'val'*/
-#define LV_DRV_DISP_RST(val)       /*pin_x_set(val)*/    /*Set the reset pin to 'val'*/
 
-/*---------
- *  SPI
- *---------*/
-#define LV_DRV_DISP_SPI_CS(val)          /*spi_cs_set(val)*/     /*Set the SPI's Chip select to 'val'*/
-#define LV_DRV_DISP_SPI_WR_BYTE(data)    /*spi_wr(data)*/        /*Write a byte the SPI bus*/
-#define LV_DRV_DISP_SPI_WR_ARRAY(adr, n) /*spi_wr_mem(adr, n)*/  /*Write 'n' bytes to SPI bus from 'adr'*/
+/* ST7789 SPI LCD specific macros */
+#if USE_ST7789
+    #include "lv_drivers/display/st7789_spi.h"
+    #define LV_DRV_DISP_CMD_DATA(val)  st7789_spi_set_dc(val)          /*Set DC pin for cmd/data*/
+    #define LV_DRV_DISP_RST(val)       st7789_spi_set_rst(val)         /*Set RST pin*/
+    #define LV_DRV_DISP_SPI_CS(val)    st7789_spi_set_cs(val)          /*Set CS pin*/
+    #define LV_DRV_DISP_SPI_WR_BYTE(data)     st7789_spi_write_data(data)      /*Write single byte*/
+    #define LV_DRV_DISP_SPI_WR_ARRAY(adr, n)  st7789_spi_write_data_array(adr, n) /*Write array*/
+#else
+    #define LV_DRV_DISP_CMD_DATA(val)  /*pin_x_set(val)*/    /*Set the command/data pin to 'val'*/
+    #define LV_DRV_DISP_RST(val)       /*pin_x_set(val)*/    /*Set the reset pin to 'val'*/
+    
+    /*---------
+     *  SPI
+     *---------*/
+    #define LV_DRV_DISP_SPI_CS(val)          /*spi_cs_set(val)*/     /*Set the SPI's Chip select to 'val'*/
+    #define LV_DRV_DISP_SPI_WR_BYTE(data)    /*spi_wr(data)*/        /*Write a byte the SPI bus*/
+    #define LV_DRV_DISP_SPI_WR_ARRAY(adr, n) /*spi_wr_mem(adr, n)*/  /*Write 'n' bytes to SPI bus from 'adr'*/
+#endif
 
 /*------------------
  *  Parallel port
@@ -306,8 +322,8 @@
 #endif
 
 #if USE_ILI9341
-#  define ILI9341_HOR_RES       LV_HOR_RES
-#  define ILI9341_VER_RES       LV_VER_RES
+#  define ILI9341_HOR_RES       320
+#  define ILI9341_VER_RES       240
 #  define ILI9341_GAMMA         1
 #  define ILI9341_TEARING       0
 #endif  /*USE_ILI9341*/
@@ -338,12 +354,20 @@
  *  Sunxi frame buffer device (/dev/fbx)
  *.........................................*/
 #ifndef USE_SUNXIFB
-#  define USE_SUNXIFB           1
+#  define USE_SUNXIFB           0
 #endif
 
 #if USE_SUNXIFB
 #  define SUNXIFB_PATH          "/dev/fb0"
 #endif
+
+/*-----------------------------------------
+ *  ST7789 SPI LCD Display
+ *-----------------------------------------*/
+#if USE_ST7789
+#  define ST7789_HOR_RES        320
+#  define ST7789_VER_RES        240
+#endif  /*USE_ST7789*/
 
 /*-----------------------------------------
  *  DRM/KMS device (/dev/dri/cardX)

@@ -1,5 +1,5 @@
 #include "myHAL.h"
-#include "lv_drivers/display/sunxifb.h"
+#include "lv_drivers/display/ST7789.h"
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
@@ -201,31 +201,25 @@ void HAL::init()
     disp_drv.ver_res = 240;
     disp_drv.draw_buf = &lv_drawbuf;
     printf("Running On Device\n");
-    uint32_t rotated = LV_DISP_ROT_NONE;
 
-    /*Linux frame buffer device init*/
-    sunxifb_init(rotated);
+    /*ST7789 SPI LCD init*/
+    st7789_spi_init();
+    st7789_init();
 
     /*A buffer for LittlevGL to draw the screen's content*/
-    static uint32_t width, height;
-    sunxifb_get_sizes(&width, &height);
-
-    buf = (lv_color_t *)sunxifb_alloc(width * height * sizeof(lv_color_t),
-                                      const_cast<char *>("lv_examples"));
+    buf = (lv_color_t *)malloc(320 * 240 * sizeof(lv_color_t));
 
     if (buf == NULL)
     {
-        sunxifb_exit();
         printf("malloc draw buffer fail\n");
         return;
     }
-    disp_drv.flush_cb = sunxifb_flush;
-    disp_drv.hor_res = width;
-    disp_drv.ver_res = height;
-    disp_drv.rotated = rotated;
+    disp_drv.flush_cb = st7789_flush;
+    disp_drv.hor_res = 320;
+    disp_drv.ver_res = 240;
     lv_disp_drv_register(&disp_drv);
     initInputDevices();
-    lv_disp_draw_buf_init(&lv_drawbuf, buf, NULL, 320 * 240 * 4);
+    lv_disp_draw_buf_init(&lv_drawbuf, buf, NULL, 320 * 240);
     signal(SIGINT, signal_exit);
     // HAL 线程
     pthread_create(&thread_hal, NULL, thread_hal_func, NULL);
