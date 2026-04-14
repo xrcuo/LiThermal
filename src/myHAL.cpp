@@ -1,5 +1,7 @@
 #include "myHAL.h"
 #include "lv_drivers/display/ST7789.h"
+#include "lv_drivers/display/st7789_spi.h"
+#include "lv_drivers/display/sunxifb.h"
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
