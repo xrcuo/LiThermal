@@ -1,7 +1,6 @@
 #include "myHAL.h"
 #include "lv_drivers/display/ST7789.h"
 #include "lv_drivers/display/st7789_spi.h"
-#include "lv_drivers/display/sunxifb.h"
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
@@ -34,7 +33,6 @@ static pthread_t thread_hal;
 // Ctrl+C退出
 void signal_exit(int signo)
 {
-    sunxifb_exit();
     printf("exit\n");
     settings_save();
     videoPlayer.disconnect();
