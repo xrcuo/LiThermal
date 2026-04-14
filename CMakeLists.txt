@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.7.4)
 
 project(LiThermal)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
-file(GLOB_RECURSE SRC_DIR_LIST "src/*.cpp" "src/*.c")	#遍历获取source/路径下所有的*.cpp和*.c文件列表
+file(GLOB_RECURSE SRC_DIR_LIST "src/*.cpp" "src/*.c" "libs/lv_drivers/display/st7789_spi.c")	#遍历获取source/路径下所有的*.cpp和*.c文件列表, plus st7789_spi.c
 
 add_compile_definitions(LV_CONF_INCLUDE_SIMPLE)	#添加宏定义
 add_compile_definitions(USE_ST7789)
